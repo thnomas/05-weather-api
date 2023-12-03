@@ -1,18 +1,12 @@
+import sys
 import requests
 from datetime import datetime
 from dotenv import dotenv_values
 
-# Load environment variables from .env file
 env_vars = dotenv_values('.env')
-
-# Access the API key
 api_key = env_vars['API_KEY']
 
-LOCATION="Drogheda,ie"
-# Endpoint:
-# - Please, use the endpoint api.openweathermap.org for your API calls
-# - Example of API call:
-# api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=1be0d5d55f890df8e97dffe93050bf9a
+location="Dublin,ie"
 
 def kelvin_to_celsius(temp_in_kelvin):
     temp_in_celsius = temp_in_kelvin - 273.15
@@ -22,8 +16,19 @@ def timestamp_converter(timestamp):
     timestamp = datetime.fromtimestamp(timestamp)
     return timestamp.strftime("%H:%M")
 
-r = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={LOCATION}&APPID={api_key}")
-data = r.json()
+def get_data(url):
+    try:
+        r = requests.get(url)
+        if r.status_code == 200:
+            return r.json()
+        else:
+            r.raise_for_status()
+    except requests.RequestException:
+        print(f"Sorry! There was an issue fetching data.")
+        sys.exit(1)
+
+url = f"https://api.openweathermap.org/data/2.5/weather?q={location}&APPID={api_key}"
+data = get_data(url)
 
 weather = data['main']
 sys = data['sys']
